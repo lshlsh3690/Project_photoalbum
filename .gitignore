@@ -1,4 +1,5 @@
 #etc
+.maven
 .gradle
 build
 .idea
