@@ -1,13 +1,16 @@
 package com.sqarecross.photoalbum.domain;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity
 @Table(name = "photo")
+@Getter
+@Setter
 public class Photo {
     @Id
     @Column(name = "photo_id", unique = true, nullable = false)
