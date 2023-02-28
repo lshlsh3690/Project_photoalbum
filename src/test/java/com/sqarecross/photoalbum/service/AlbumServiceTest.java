@@ -1,5 +1,6 @@
 package com.sqarecross.photoalbum.service;
 
+import com.sqarecross.photoalbum.Constants;
 import com.sqarecross.photoalbum.domain.Album;
 import com.sqarecross.photoalbum.domain.Photo;
 import com.sqarecross.photoalbum.dto.AlbumDto;
@@ -12,6 +13,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,9 +61,9 @@ class AlbumServiceTest {
         album.setAlbumName("테스트");
         Album savedAlbumDto = albumRepository.save(album);
 
-        assertThatThrownBy(() -> albumService.getAlbum(3L))
+        assertThatThrownBy(() -> albumService.getAlbum(5000L))
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("앨범 아이디 3로 조회되지 않았습니다.");
+                .hasMessageContaining("앨범 아이디 5000로 조회되지 않았습니다.");
     }
 
     @Test
@@ -79,5 +84,25 @@ class AlbumServiceTest {
         photoRepository.save(photo2);
 
         assertEquals(2, photoRepository.countByAlbum_AlbumId(savedAlbum.getAlbumId()));
+    }
+
+    @Test
+    void createAlbumTest() throws IOException {
+        AlbumDto albumDto = new AlbumDto();
+        albumDto.setAlbumName("test");
+        AlbumDto savedAlbumDto = albumService.createAlbum(albumDto);
+
+        assertTrue(Files.exists(Paths.get(Constants.PATH_PREFIX +"/photos/original/" + savedAlbumDto.getAlbumId())));
+        assertTrue(Files.exists(Paths.get(Constants.PATH_PREFIX +"/photos/thumb/" + savedAlbumDto.getAlbumId())));
+    }
+
+    @Test
+    void deleteAlbumTest() throws IOException {
+        AlbumDto albumDto = new AlbumDto();
+        albumDto.setAlbumName("test");
+        AlbumDto savedAlbumDto = albumService.deleteAlbum(albumDto);
+
+        assertFalse(Files.exists(Paths.get(Constants.PATH_PREFIX +"/photos/original/" + savedAlbumDto.getAlbumId())));
+        assertFalse(Files.exists(Paths.get(Constants.PATH_PREFIX +"/photos/thumb/" + savedAlbumDto.getAlbumId())));
     }
 }

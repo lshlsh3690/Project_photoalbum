@@ -16,6 +16,8 @@ public class AlbumCustomRepositoryImpl implements AlbumCustomRepository {
 
     @Override
     public Optional<Album> findByName(String albumName) {
-        return Optional.ofNullable(entityManager.createQuery("select m from Album m", Album.class).getSingleResult());
+        return Optional.ofNullable(entityManager.createQuery("select m from Album m where m.albumName=:albumName", Album.class)
+                .setParameter("albumName", albumName)
+                .getSingleResult());
     }
 }

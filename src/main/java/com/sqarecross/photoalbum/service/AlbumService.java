@@ -1,5 +1,6 @@
 package com.sqarecross.photoalbum.service;
 
+import com.sqarecross.photoalbum.Constants;
 import com.sqarecross.photoalbum.domain.Album;
 import com.sqarecross.photoalbum.dto.AlbumDto;
 import com.sqarecross.photoalbum.mapper.AlbumMapper;
@@ -8,6 +9,9 @@ import com.sqarecross.photoalbum.repository.PhotoRepository;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 @Service
@@ -39,5 +43,29 @@ public class AlbumService {
         } else {
             throw new EntityNotFoundException("앨범 이름 "+albumName+"로 조회되지 않았습니다.");
         }
+    }
+
+    public AlbumDto createAlbum(AlbumDto albumDto) throws IOException {
+        Album album = AlbumMapper.convertToModel(albumDto);
+        this.albumRepository.save(album);
+        this.createAlbumDirectories(album);
+        return AlbumMapper.convertToDto(album);
+    }
+
+    private void createAlbumDirectories(Album album) throws IOException {
+        Files.createDirectories(Paths.get(Constants.PATH_PREFIX +"/photos/original/" + album.getAlbumId()));
+        Files.createDirectories(Paths.get(Constants.PATH_PREFIX +"/photos/thumb/" + album.getAlbumId()));
+    }
+
+    public AlbumDto deleteAlbum(AlbumDto albumDto) throws IOException {
+        Album album = AlbumMapper.convertToModel(albumDto);
+        this.albumRepository.delete(album);
+        this.deleteAlbumDriectories(album);
+        return AlbumMapper.convertToDto(album);
+    }
+
+    private void deleteAlbumDriectories(Album album) throws IOException {
+        Files.deleteIfExists(Paths.get(Constants.PATH_PREFIX + "/photos/original/" + album.getAlbumId()));
+        Files.deleteIfExists(Paths.get(Constants.PATH_PREFIX +"/photos/thumb/" + album.getAlbumId()));
     }
 }
