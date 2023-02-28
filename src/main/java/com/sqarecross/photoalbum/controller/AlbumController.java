@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequestMapping("/albums")
@@ -42,4 +43,24 @@ public class AlbumController {
         return ResponseEntity.ok(savedAlbumDto);
     }
 
+    @GetMapping
+    public ResponseEntity<List<AlbumDto>>getAlbumList(@RequestParam(value = "keyword", required = false, defaultValue = "")final String keyword,
+                                                      @RequestParam(value = "sort", required = false, defaultValue = "byDate")final  String sort,
+                                                      @RequestParam(value = "orderBy", required = false, defaultValue = "desc")final String orderBy){
+        List<AlbumDto> albumDtos = this.albumService.getAlbumList(keyword,sort,orderBy);
+        return ResponseEntity.ok(albumDtos);
+    }
+
+    @PutMapping("/{albumId}")
+    public ResponseEntity<AlbumDto> updateAlbumName(@PathVariable("albumId") final Long albumId,
+                                                    @RequestBody final AlbumDto albumDto) {
+        AlbumDto res = this.albumService.changeName(albumId, albumDto);
+        return ResponseEntity.ok(res);
+    }
+
+    @DeleteMapping("/{albumId}")
+    public ResponseEntity<?> deleteAlbum(@PathVariable("albumId")final Long albumId) throws IOException {
+        this.albumService.deleteAlbum(albumId);
+        return ResponseEntity.noContent().build();
+    }
 }

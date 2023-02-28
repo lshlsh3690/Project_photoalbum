@@ -17,7 +17,7 @@ public class Photo {
     @GeneratedValue
     private Long photoId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "album_id")
     private Album album;
 
