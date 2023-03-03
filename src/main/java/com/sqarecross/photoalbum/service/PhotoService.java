@@ -17,7 +17,6 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -88,7 +87,7 @@ public class PhotoService {
     public void saveFile(MultipartFile file, Long albumId, String fileName) {
         try {
             if(!file.getContentType().contains("image")){
-                throw new RuntimeException("Could not store the file. Error: "+e.getMessage());
+                throw new RuntimeException("Could not store the file. Error");
             }
             String filePath = albumId + "/" + fileName;
             Files.copy(file.getInputStream(), Paths.get(original_path + "/" + filePath));
@@ -103,5 +102,13 @@ public class PhotoService {
         }catch (Exception e){
             throw new RuntimeException("Could not store the file. Error: "+e.getMessage());
         }
+    }
+
+    public File getImageFile(Long photoId){
+        Optional<Photo> res = this.photoRepository.findById(photoId);
+        if(res.isEmpty()){
+            throw new EntityNotFoundException(String.format("사진을 ID %d를 찾을 수 없습니다", photoId));
+        }
+        return new File(Constants.PATH_PREFIX + res.get().getOriginalUrl());
     }
 }
