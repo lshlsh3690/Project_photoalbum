@@ -1,6 +1,8 @@
 package com.sqarecross.photoalbum.controller;
 
+import com.sqarecross.photoalbum.dto.AlbumDto;
 import com.sqarecross.photoalbum.dto.PhotoDto;
+import com.sqarecross.photoalbum.service.AlbumService;
 import com.sqarecross.photoalbum.service.PhotoService;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.core.io.FileSystemResource;
@@ -20,9 +22,11 @@ import java.util.zip.ZipOutputStream;
 @RequestMapping("/albums/{albumId}/photos")
 public class PhotoController {
     private final PhotoService photoService;
+    private final AlbumService albumService;
 
-    public PhotoController(PhotoService photoService) {
+    public PhotoController(PhotoService photoService, AlbumService albumService) {
         this.photoService = photoService;
+        this.albumService = albumService;
     }
 
     @GetMapping("/{photoId}")
@@ -78,5 +82,12 @@ public class PhotoController {
         }
     }
 
-
+    @GetMapping
+    public ResponseEntity<List<PhotoDto>> getPhotoList(@PathVariable("albumId") final Long albumId,
+                                                       @RequestParam(value = "sort", required = false, defaultValue = "byDate") final String sort,
+                                                       @RequestParam(value = "keyword", required = false) final String keyword) {
+        AlbumDto album = this.albumService.getAlbum(albumId);
+        List<PhotoDto> photoDtoList = this.photoService.getPhotoList(albumId, keyword, sort);
+        return ResponseEntity.ok(photoDtoList);
+    }
 }

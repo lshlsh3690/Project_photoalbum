@@ -9,6 +9,7 @@ import com.sqarecross.photoalbum.repository.AlbumRepository;
 import com.sqarecross.photoalbum.repository.PhotoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.imgscalr.Scalr;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -110,5 +114,19 @@ public class PhotoService {
             throw new EntityNotFoundException(String.format("사진을 ID %d를 찾을 수 없습니다", photoId));
         }
         return new File(Constants.PATH_PREFIX + res.get().getOriginalUrl());
+    }
+
+    public List<PhotoDto> getPhotoList(Long albumId, String keyword, String sort) {
+        List<Photo> res = new ArrayList<>();
+        if (Objects.equals(sort, "byDate")) {
+            res = this.photoRepository.findAllByFileNameContainingAndAlbum_AlbumIdOrderByUploadedAtDesc(keyword, albumId);
+        }else if(sort.equals("byName")){
+            res = this.photoRepository.findAllByFileNameContainingAndAlbum_AlbumIdOrderByFileNameDesc(keyword, albumId);
+        }
+        List<PhotoDto> photoDtos = new ArrayList<>();
+        for (Photo photo : res) {
+            photoDtos.add(PhotoMapper.convertToDto(photo));
+        }
+        return photoDtos;
     }
 }
